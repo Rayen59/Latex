@@ -1,0 +1,6 @@
+{
+  "name": "MathMessenger - Concours & Chat LaTeX",
+  "description": "Plateforme de messagerie instantanée mathématique avec support LaTeX en direct, évaluation administrateur (vert, orange, rouge), partage d'images et classements détaillés par pays et genre.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
