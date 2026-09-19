@@ -51,7 +51,7 @@ export const UserChatView: React.FC<UserChatViewProps> = ({
         setMessages(data);
       }
     } catch (err) {
-      console.error('Error fetching messages:', err);
+      console.warn('Syncing messages retry:', err);
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ export const UserChatView: React.FC<UserChatViewProps> = ({
         }
       }
     } catch (err) {
-      console.error('Error syncing user info:', err);
+      console.warn('Syncing user profile retry:', err);
     }
   };
 

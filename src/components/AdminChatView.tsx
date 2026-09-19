@@ -64,7 +64,7 @@ export const AdminChatView: React.FC<AdminChatViewProps> = ({
         setUsers(data);
       }
     } catch (err) {
-      console.error('Error fetching users:', err);
+      console.warn('Syncing candidates list retry:', err);
     } finally {
       setLoadingUsers(false);
     }
@@ -80,7 +80,7 @@ export const AdminChatView: React.FC<AdminChatViewProps> = ({
         setMessages(data);
       }
     } catch (err) {
-      console.error('Error fetching messages:', err);
+      console.warn('Syncing user messages retry:', err);
     } finally {
       setLoadingMessages(false);
     }

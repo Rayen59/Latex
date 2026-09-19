@@ -23,8 +23,21 @@ interface RankingsViewProps {
 
 export const RankingsView: React.FC<RankingsViewProps> = ({ currentUser, onBack }) => {
   const { isDark, toggleTheme } = useTheme();
-  const [rankingsData, setRankingsData] = useState<RankingsData | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  // Initialize with cached rankings if available for instant rendering
+  const [rankingsData, setRankingsData] = useState<RankingsData | null>(() => {
+    try {
+      const cached = localStorage.getItem('math_prep_rankings_cache');
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch {
+      // Ignore parse error
+    }
+    return null;
+  });
+
+  const [loading, setLoading] = useState(() => rankingsData === null);
   const [activeTab, setActiveTab] = useState<'general' | 'countries' | 'gender'>('general');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<string>('all');
@@ -41,6 +54,11 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentUser, onBack 
           const data: RankingsData = await res.json();
           setRankingsData(data);
           setErrorMsg(null);
+          try {
+            localStorage.setItem('math_prep_rankings_cache', JSON.stringify(data));
+          } catch {
+            // Storage quota ignore
+          }
           return;
         }
       }
@@ -54,16 +72,26 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentUser, onBack 
       if (usersRes.ok && statsRes.ok) {
         const users = await usersRes.json();
         const stats = await statsRes.json();
-        setRankingsData({ users, stats });
+        const combined = { users, stats };
+        setRankingsData(combined);
         setErrorMsg(null);
+        try {
+          localStorage.setItem('math_prep_rankings_cache', JSON.stringify(combined));
+        } catch {
+          // Storage quota ignore
+        }
       } else {
-        throw new Error('Impossible de charger les données du classement.');
+        throw new Error('Données temporairement indisponibles.');
       }
     } catch (err: unknown) {
-      console.error('Failed to load rankings:', err);
-      if (!rankingsData) {
-        setErrorMsg('Erreur lors du chargement des classements. Réessai en cours...');
-      }
+      // Graceful warn instead of error to avoid polluting console during transient network reconnects
+      console.warn('Rankings refresh note:', err);
+      setRankingsData((prev) => {
+        if (!prev) {
+          setErrorMsg('Connexion en cours avec le serveur de classement...');
+        }
+        return prev;
+      });
     } finally {
       setLoading(false);
     }
